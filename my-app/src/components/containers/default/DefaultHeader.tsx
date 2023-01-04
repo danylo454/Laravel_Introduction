@@ -26,6 +26,11 @@ const DefaultHeader = () => {
                   Head Page
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" aria-current="page" to="/addProduct">
+                  Add Product
+                </Link>
+              </li>
             </ul>
             <ul className="navbar-nav">
               <li className="nav-item">

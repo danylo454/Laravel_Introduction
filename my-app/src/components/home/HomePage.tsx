@@ -15,6 +15,22 @@ function HomePage() {
     });
   }, []);
 
+  const DeleteUserHandleSubmit = (event: any) => {
+    event.preventDefault();
+    let idProduct = event.target.id;
+    http
+      .delete<IProductItem>(`/api/products/${idProduct}`)
+      .then((resp) => {
+        dispatch({ type: "PRODUCT_DELETED" });
+        http.get<Array<IProductItem>>("/api/products").then((resp) => {
+          dispatch({ type: "PRODUCT_LIST", payload: resp.data });
+        });
+      })
+      .catch((e) => {
+        console.log("Errors: ", e);
+      });
+  };
+
   return (
     <>
       <div
@@ -22,6 +38,7 @@ function HomePage() {
           textAlign: "center",
           textDecoration: "underline",
           marginBottom: "25px",
+          marginTop: "10px",
         }}
       >
         <h1>Products</h1>
@@ -36,16 +53,28 @@ function HomePage() {
               NAME
             </th>
             <th style={{ width: "33%" }} scope="col">
-              detail
+              DETAIL
+            </th>
+            <th style={{ width: "33%" }} scope="col">
+              DELETE
             </th>
           </tr>
         </thead>
         <tbody>
           {list.map(({ id, name, detail }) => (
             <tr key={id}>
-              <td key={id}>{id}</td>
-              <td key={name}>{name}</td>
-              <td key={detail}>{detail}</td>
+              <td>{id}</td>
+              <td>{name}</td>
+              <td>{detail}</td>
+              <td>
+                <button
+                  id={id.toString()}
+                  className="btn btn-danger"
+                  onClick={DeleteUserHandleSubmit}
+                >
+                  delete
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

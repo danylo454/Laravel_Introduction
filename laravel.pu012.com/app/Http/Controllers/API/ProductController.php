@@ -5,7 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\Request;
-
+Use \Carbon\Carbon;
 class ProductController extends Controller
 {
     /**
@@ -20,7 +20,6 @@ class ProductController extends Controller
             JSON_UNESCAPED_UNICODE);
 
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -61,8 +60,43 @@ class ProductController extends Controller
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
-    {
-        //
+    public function destroy($id) {
+
     }
+    public function deleteproduct($id){
+        $product = Product::find($id);
+        if (is_null($product)){
+            return $this->sendError("Product not found!");
+        }
+        $product->delete();
+        return response()->json([
+            "success" => true,
+            "message" => "Product deleted successfully!",
+            "data" => $product
+        ]);
+    }
+
+    public function addNewProduct(Request $request){
+
+       $name = $request->name;
+       $detail = $request->detail;
+       $created_at = Carbon::now();
+       if($name == null || $detail == null){
+           return $this->sendError("Syntax error with null!");
+       }
+        $product = new Product();
+        $product->name = $name;
+        $product->detail = $detail;
+        $product->created_at = $created_at;
+        $product->save();
+
+        return response()->json([
+            "success" => true,
+            "message" => "Product successfully stored!",
+            "data" => $product,
+
+        ]);
+    }
+
+
 }

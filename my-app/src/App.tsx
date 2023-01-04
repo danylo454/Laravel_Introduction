@@ -4,6 +4,7 @@ import Login from "./components/auth/login";
 import Register from "./components/auth/register";
 import DefaultLayout from "./components/containers/default";
 import Home from "./components/home";
+import AddProduct from "./components/product/addProduct";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route index element={<Home />}></Route>
           <Route path="login" element={<Login />}></Route>
           <Route path="register" element={<Register />}></Route>
+          <Route path="addProduct" element={<AddProduct />}></Route>
         </Route>
       </Routes>
     </>

@@ -10,4 +10,6 @@ export interface ProductState{
 
 export enum ProductActionTypes{
     PRODUCT_LIST = "PRODUCT_LIST",
+    PRODUCT_DELETED = "PRODUCT_DELETED",
+    PRODUCT_SUCCESSFULLY_ADDED = "PRODUCT_SUCCESSFULLY_ADDED",
 };
