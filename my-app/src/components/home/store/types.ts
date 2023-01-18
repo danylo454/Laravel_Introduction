@@ -13,7 +13,8 @@ export interface IPorductResponse {
 
 export interface ISearchProduct {
   name?: string;
-  page: number;
+  page?: number | string | null;
+  page_size: string;
 }
 
 export interface ProductState {

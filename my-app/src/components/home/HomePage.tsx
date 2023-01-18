@@ -1,24 +1,24 @@
-import classNames from "classnames";
 import { useFormik } from "formik";
 import qs from "qs";
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
-import { number } from "yup";
+import { useSearchParams } from "react-router-dom";
 import { useActions } from "../../hooks/useActions";
 import { useTypedSelector } from "../../hooks/useTypedSelector";
+import Pagination from "../common/Pagination";
 import { ISearchProduct } from "./store/types";
 
 const HomePage = () => {
   const { list, total, count_page, current_page } = useTypedSelector(
     (store) => store.products
   );
-
+  const [getPageSize, SetPageSize] = useState("2");
   const { GetProductList } = useActions();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [search, setSearch] = useState<ISearchProduct>({
     name: searchParams.get("name") || "",
-    page: 1,
+    page: searchParams.get("page") || 1,
+    page_size: getPageSize,
   });
 
   function filterNonNull(obj: ISearchProduct) {
@@ -26,10 +26,18 @@ const HomePage = () => {
   }
 
   useEffect(() => {
-    console.log("Search: ", search);
-    GetProductList(search);
-  }, [search]);
+    const find: ISearchProduct = {
+      name: searchParams.get("name") || "",
+      page: searchParams.get("page") || 1,
+      page_size: getPageSize,
+    };
+    GetProductList(find);
+    setSearch(find);
+    //clear formik data
+    formik.values.name = find.name;
+  }, [searchParams, getPageSize]);
 
+  //Maping data from db in html
   const data_content = list.map((product) => (
     <tr key={product.id}>
       <td>{product.id}</td>
@@ -38,40 +46,26 @@ const HomePage = () => {
     </tr>
   ));
 
+  //Try to make arrow pagination but have one bug
+  const onClickArrow = (namber: number, action: string) => {
+    if (action == "-" && current_page != 1) {
+      setSearch({ ...search, page: (search.page as number) - namber });
+      console.log();
+      setSearchParams(qs.stringify(filterNonNull(search)));
+    }
+    if (action == "+" && count_page != search.page) {
+      setSearch({ ...search, page: (search.page as number) + namber });
+      setSearchParams(qs.stringify(filterNonNull(search)));
+    }
+  };
   const buttons = [];
   for (let i = 1; i <= count_page; i++) {
     buttons.push(i);
   }
 
-  const pagination = buttons.map((page) => {
-    if (count_page <= 5) {
-      return (
-        <li key={page} className="page-item">
-          <Link
-            className={classNames("page-link", {
-              active: page === current_page,
-            })}
-            onClick={() => {
-              setSearch({ ...search, page: page });
-            }}
-            to={"?" + qs.stringify(filterNonNull({ ...search, page: page }))}
-          >
-            {page}
-          </Link>
-        </li>
-      );
-    }
-  });
-
-  const onClickArrow = (namber: number, action: string) => {
-    if (action == "-" && current_page != 1) {
-      setSearch({ ...search, page: (search.page -= namber) });
-      setSearchParams(qs.stringify(filterNonNull(search)));
-    }
-    if (action == "+" && count_page != search.page) {
-      setSearch({ ...search, page: (search.page += namber) });
-      setSearchParams(qs.stringify(filterNonNull(search)));
-    }
+  const handleClickPaginate = (page: number) => {
+    setSearch({ ...search, page: page });
+    setSearchParams(qs.stringify(filterNonNull({ ...search, page: page })));
   };
 
   const onSubmit = (values: ISearchProduct) => {
@@ -83,6 +77,9 @@ const HomePage = () => {
     initialValues: search,
     onSubmit,
   });
+  const handleChange = (e: any) => {
+    SetPageSize(e.target.value);
+  };
 
   return (
     <>
@@ -92,10 +89,9 @@ const HomePage = () => {
           className=" w-100 mt-3 d-flex flex-wrap border border-secondary rounded-3 position-relative"
           onSubmit={formik.handleSubmit}
         >
-          <div className="mb-3 p-3 w-25">
-            <label htmlFor="name" className="form-label">
-              Назва
-            </label>
+          <div
+            style={{ display: "flex", justifyContent: "center", margin: "5px" }}
+          >
             <input
               type="text"
               id="name"
@@ -106,12 +102,53 @@ const HomePage = () => {
             />
           </div>
 
-          <button type="submit" className="btn mb-3 btn-secondary">
-            <span>
-              <i className="fa fa-search"></i>
-            </span>
-            <span>Пошук</span>
-          </button>
+          <div style={{ display: "flex" }}>
+            <div style={{ alignItems: "center", display: "flex" }}>
+              <label
+                htmlFor="customRange1"
+                className="form-label"
+                style={{
+                  margin: "0",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                }}
+              >
+                Size page:
+              </label>
+            </div>
+
+            <select
+              id="customRange1"
+              className="form-select"
+              onChange={handleChange}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                margin: "5px",
+              }}
+            >
+              <option value="2">2</option>
+              <option value="4">4</option>
+              <option value="6">6</option>
+              <option value="8">8</option>
+            </select>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              marginLeft: "20px",
+            }}
+          >
+            <button type="submit" className="btn btn-secondary">
+              <span>
+                <i className="fa fa-search"></i>
+              </span>
+              <span>Пошук</span>
+            </button>
+          </div>
         </form>
 
         <h4>Всього записів: {total}</h4>
@@ -142,7 +179,11 @@ const HomePage = () => {
                 aria-hidden="true"
               ></i>
             </li>
-            {pagination}
+            <Pagination
+              current_page={current_page}
+              count_page={count_page}
+              onClick={handleClickPaginate}
+            />
             <li
               style={{
                 display: "flex",
