@@ -1,21 +1,23 @@
-import { ProductActionTypes, ProductState } from './types';
+import { ProductState, ProductActionTypes, ProductActions } from './types';
 
-const initialState : ProductState ={
-    list:[]
+const initialState: ProductState = {
+  list: [],
+  count_page: 0,
+  total: 0,
+  current_page: 0,
+  error_message: ""
 };
 
-export const productReducer = (state=initialState,action:any) : ProductState => {
-    console.log(action.payload);
-    switch(action.type){
-        case ProductActionTypes.PRODUCT_LIST:{
-            return {...state,list:[...action.payload]}
+export const productReducer = (state=initialState, action: ProductActions ) : ProductState => {
+    switch(action.type) {
+        case ProductActionTypes.PRODUCT_LIST: {
+            //console.log("Payload:", action.payload);
+            return {
+                ...state,
+                ...action.payload,
+            };
         }
-        case ProductActionTypes.PRODUCT_DELETED:{
-            return {...state,list:[]}
-        }
-        case ProductActionTypes.PRODUCT_SUCCESSFULLY_ADDED:{
-            return {...state}
-        }
-        default:{return state};
+        default:
+            return state;
     }
 }
